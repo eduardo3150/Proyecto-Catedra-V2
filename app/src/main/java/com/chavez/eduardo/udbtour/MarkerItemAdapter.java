@@ -1,6 +1,7 @@
 package com.chavez.eduardo.udbtour;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,9 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
             public boolean onLongClick(View v) {
                 if (place.getCategoria().equals("Personalizado")){
                     Toast.makeText(context,"Seleciono " +place.getId(),Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context,EditarCustom.class);
+                    intent.putExtra("ID_",place.getId());
+                    context.startActivity(intent);
                 }
                 return true;
             }

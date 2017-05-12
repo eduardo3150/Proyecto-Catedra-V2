@@ -24,6 +24,7 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     ArrayList<Place> placesMkr = new ArrayList<>();
     ArrayList<String> categories = new ArrayList<>();
     ArrayList<Place> placesGral = new ArrayList<>();
+    ArrayList<Place> placesSqlite = new ArrayList<>();
 
     RecyclerView recyclerViewMarkers;
     RecyclerView recyclerViewCategory;
@@ -109,7 +110,6 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         super.onResume();
         setCategoryList();
         setMarkersList();
-        generateSQLiteData();
         refreshRecycler();
     }
 
@@ -190,8 +190,8 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
 
     private void generateSQLiteData(){
         Cursor c = mapasModel.mostrarTodo();
+        placesSqlite.clear();
         c.moveToFirst();
-
         while (!c.isAfterLast()){
             idSQ = c.getInt(c.getColumnIndex("id"));
             nombreSQ = c.getString(c.getColumnIndex("nombre"));
@@ -202,8 +202,9 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
             thumbnailSQ = c.getString(c.getColumnIndex("thumbnail"));
             categoriaSQ = c.getString(c.getColumnIndex("categoria"));
 
-            placesGral.add(new Place(idSQ,nombreSQ,descripcionSQ,latitudSQ,longitudSQ,imagenSQ,thumbnailSQ,categoriaSQ));
+            placesSqlite.add(new Place(idSQ,nombreSQ,descripcionSQ,latitudSQ,longitudSQ,imagenSQ,thumbnailSQ,categoriaSQ));
             c.moveToNext();
         }
+        placesGral.addAll(placesSqlite);
     }
 }

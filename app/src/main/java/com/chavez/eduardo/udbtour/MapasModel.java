@@ -37,9 +37,9 @@ public class MapasModel {
 
     public void actualizar(int id, String nombre, String descripcion, double latitud, double longitud, String imagen, String thumbnail, String categoria) {
         String consulta;
-        consulta = "UPDATE mapas SET id=" + id + ",nombre='" + nombre + "',descripcion='" + descripcion +
+        consulta = "UPDATE mapas SET nombre='" + nombre + "',descripcion='" + descripcion +
                 "',latitud='" + latitud + "',longitud='" + longitud + "',imagen='" + imagen +
-                "',thumbnail='" + thumbnail + "',categoria='" + categoria + " where id='" + id + "'";
+                "',thumbnail='" + thumbnail + "',categoria='" + categoria + "' where id=" + id + ";";
 
         db.execSQL(consulta);
 
