@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">UDBTOUR</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_markers_list">MarkersList</string>
+</resources>
