@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -33,11 +34,28 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
 
     @Override
     public void onBindViewHolder(MarkerViewHolder holder, int position) {
-        Place place = places.get(position);
+        final Place place = places.get(position);
 
         Picasso.with(context).load(place.getImagen()).fit().placeholder(R.drawable.loading).error(R.drawable.alert).into(holder.imageMarker);
         holder.markerName.setText(place.getNombre());
         holder.markerDescription.setText(place.getDescripcion());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (place.getCategoria().equals("Personalizado")){
+                    Toast.makeText(context,"Seleciono custom",Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+        });
     }
 
     @Override

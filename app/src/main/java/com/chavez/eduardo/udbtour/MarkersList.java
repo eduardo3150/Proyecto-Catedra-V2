@@ -1,5 +1,6 @@
 package com.chavez.eduardo.udbtour;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,8 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     LinearLayoutManager horizontalRecycler;
     CategoryItemAdapter categoryItemAdapter;
     String categoriaBandera = "";
+    String TODO = "Todo";
+    String CUSTOM = "Custom";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,9 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                Intent intent = new Intent(MarkersList.this,MapsActivity.class);
+                intent.putExtra("Markers",placesMkr);
+                startActivity(intent);
             }
         });
 
@@ -58,10 +64,11 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     }
 
     private void prepareData() {
-        placesGral.add(new Place(1, "Estadio Felix Charlaix", "Estadio polideportivo", -88.183087, 13.475367, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "Centro de deportes"));
-        placesGral.add(new Place(2, "Item 2", " polideportivo", -88.183087, 13.475367, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "Centro de deportes"));
-        placesGral.add(new Place(2, "Item 2", " Playa", -88.183087, 13.475367, "http://assets.vg247.com/current//2016/06/sniper_elite_4-5-600x338.jpg", "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "Playa"));
-        placesGral.add(new Place(2, "Item 2", " Volcan", -88.183087, 13.475367, "http://nerdist.com/wp-content/uploads/2016/12/The-Last-of-Us-Part-II.jpg", "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "Volcan"));
+        placesGral.add(new Place(1, "Estadio Felix Charlaix", "Estadio polideportivo", 13.740402, -89.138712, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "https://i.imgur.com/Z1atGBC.png", "Centro de deportes"));
+        placesGral.add(new Place(2, "Item 2", " polideportivo", 13.714904, -89.155007, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "https://i.imgur.com/Z1atGBC.png", "Centro de deportes"));
+        placesGral.add(new Place(2, "Item 2", " Playa", 13.694484, -89.155193, "http://assets.vg247.com/current//2016/06/sniper_elite_4-5-600x338.jpg", "http://i.imgur.com/K6g18lm.png", "Playa"));
+        placesGral.add(new Place(2, "Item 2", " Volcan", 13.655405, -89.171190, "http://nerdist.com/wp-content/uploads/2016/12/The-Last-of-Us-Part-II.jpg", "https://i.imgur.com/yr95Qr7.png", "Volcan"));
+        placesGral.add(new Place(2, "Custom", " Volcan", 13.636806, -89.191550, "http://nerdist.com/wp-content/uploads/2016/12/The-Last-of-Us-Part-II.jpg", "http://i.imgur.com/K6g18lm.png", "Personalizado"));
 
         for (Place tmp : placesGral){
             categories.add(tmp.getCategoria());
@@ -69,9 +76,9 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         Set<String> unique = new HashSet<>();
         unique.addAll(categories);
         categories.clear();
+        categories.add(TODO);
         categories.addAll(unique);
-        categoriaBandera = placesGral.get(0).getCategoria();
-
+        categoriaBandera = TODO;
         refreshRecycler();
     }
 
@@ -80,6 +87,9 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         recyclerViewMarkers.removeAllViews();
         for (Place tmp2: placesGral){
             if (tmp2.getCategoria().equals(categoriaBandera)){
+                placesMkr.add(tmp2);
+            }
+            if (categoriaBandera.equals(TODO)){
                 placesMkr.add(tmp2);
             }
         }
