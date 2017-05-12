@@ -51,7 +51,7 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
             @Override
             public boolean onLongClick(View v) {
                 if (place.getCategoria().equals("Personalizado")){
-                    Toast.makeText(context,"Seleciono custom",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,"Seleciono " +place.getId(),Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }

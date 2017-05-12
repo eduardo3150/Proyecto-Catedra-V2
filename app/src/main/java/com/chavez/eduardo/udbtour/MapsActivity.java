@@ -1,14 +1,19 @@
 package com.chavez.eduardo.udbtour;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,6 +22,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.koushikdutta.ion.Ion;
 
@@ -36,8 +42,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng defaultLatLng = new LatLng(13.714966, -89.155755);
     Button currentPos;
     Bitmap custom;
-
+    Double latitudCust, longitudCust;
+    String placeHolderCust, imgCust;
     FollowPosition followPosition;
+    String CATEGORIA = "Personalizado";
+
+    MapasModel mapasModel;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -83,7 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-
+        mapasModel = new MapasModel(this);
+        placeHolderCust = "http://i.imgur.com/XVJ4SSM.png";
+        imgCust ="https://i.imgur.com/yr95Qr7.png";
 
     }
 
@@ -117,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void onMapReady (GoogleMap googleMap){
             mMap = googleMap;
-
+            custom = getBitmapFromURL(imgCust);
             followPosition = new FollowPosition(this.mMap, MapsActivity.this);
 
             followPosition.register(MapsActivity.this);
@@ -138,31 +150,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // This will be displayed on taping the marker
                     markerOptions.title(latLng.latitude + " : " + latLng.longitude);
                     markerOptions.icon(BitmapDescriptorFactory.fromBitmap(custom));
+                    latitudCust = latLng.latitude;
+                    longitudCust = latLng.longitude;
                     // Clears the previously touched position
-                    //mMap.clear();
-
+                    mMap.clear();
                     // Animating to the touched position
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-
                     // Placing a marker on the touched position
-                    mMap.addMarker(markerOptions);
+                    //mMap.addMarker(markerOptions);
+                    newCustomMarker();
                 }
             });
 
-            if (places != null && places.size() > 0) {
-                if (mMap != null) {
-                    for (Place tmp : places) {
-                        LatLng tmpLatLng = new LatLng(tmp.getLatitud(), tmp.getLongitud());
-                        mMap.addMarker(new MarkerOptions().position(tmpLatLng).title(tmp.getNombre()).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(tmp.getThumbnail()))));
-                        if (tmp.getCategoria().equals("Personalizado")){
-                            custom = getBitmapFromURL(tmp.getThumbnail());
-                        }
-                    }
-                }
+            loadMarkers();
 
+        }
+
+    private void loadMarkers() {
+        if (places != null && places.size() > 0) {
+            if (mMap != null) {
+                for (Place tmp : places) {
+                    LatLng tmpLatLng = new LatLng(tmp.getLatitud(), tmp.getLongitud());
+                    mMap.addMarker(new MarkerOptions().position(tmpLatLng).title(tmp.getNombre()).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(tmp.getThumbnail()))));
+                }
             }
 
         }
+    }
 
     private void chooseMoveCamera(GoogleMap mMap, LatLng latLng, int zoom) {
         CameraPosition cameraPosition = new CameraPosition.Builder().zoom(zoom).target(latLng).build();
@@ -201,4 +215,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
+
+
+    public void newCustomMarker(){
+        LayoutInflater li = LayoutInflater.from(this);
+        View dialogView = li.inflate(R.layout.dialog,null);
+        AlertDialog.Builder alertDialog= new AlertDialog.Builder(this);
+        alertDialog.setView(dialogView);
+        final EditText userInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputName);
+        final EditText userInput2 = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputDescription);
+        mMap.clear();
+        alertDialog.setTitle("Marcador nuevo")
+                .setCancelable(false)
+                .setMessage("")
+                .setPositiveButton("Agregar marcador", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String nombre = userInput.getText().toString();
+                        String descripcion = userInput2.getText().toString();
+                        mapasModel.insertar(nombre,descripcion,latitudCust,longitudCust,placeHolderCust,imgCust,CATEGORIA);
+                        places.add(new Place(1,nombre,descripcion,latitudCust,longitudCust,placeHolderCust,imgCust,CATEGORIA));
+                        Toast.makeText(getApplicationContext(),"Marcador agregado",Toast.LENGTH_LONG).show();
+                        loadMarkers();
+                    }
+                })
+                .setNegativeButton("No agregar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        loadMarkers();
+                    }
+                })
+                .show();
+    }
+
 }

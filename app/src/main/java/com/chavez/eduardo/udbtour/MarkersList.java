@@ -1,9 +1,14 @@
 package com.chavez.eduardo.udbtour;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +34,45 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     String TODO = "Todo";
     String CUSTOM = "Custom";
 
+
+    int[] id;
+    String[] nombre;
+    String[] descripcion;
+    double[] latitud;
+    double[] longitud;
+    String[] imagen;
+    String[] thumbnail;
+    String[] categoria;
+
+
+    int idSQ;
+    String nombreSQ, descripcionSQ, imagenSQ, thumbnailSQ, categoriaSQ;
+    double latitudSQ,longitudSQ;
+
+    MapasModel mapasModel;
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Status");
+
+            id = intent.getIntArrayExtra("id");
+            nombre = intent.getStringArrayExtra("nombre");
+            descripcion = intent.getStringArrayExtra("descripcion");
+            latitud = intent.getDoubleArrayExtra("latitud");
+            longitud = intent.getDoubleArrayExtra("longitud");
+            imagen = intent.getStringArrayExtra("imagen");
+            thumbnail = intent.getStringArrayExtra("thumbnail");
+            categoria = intent.getStringArrayExtra("categoria");
+
+            prepareData();
+
+        }
+    };
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,12 +80,17 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        startService(new Intent(MarkersList.this, WebService.class));
+        LocalBroadcastManager.getInstance(MarkersList.this).registerReceiver(
+                mMessageReceiver, new IntentFilter("WebService"));
+
+
+        mapasModel = new MapasModel(this);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
                 Intent intent = new Intent(MarkersList.this,MapsActivity.class);
                 intent.putExtra("Markers",placesMkr);
                 startActivity(intent);
@@ -52,39 +101,57 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         recyclerViewCategory = (RecyclerView) findViewById(R.id.recyclerViewCategories);
         verticalRecycler = new LinearLayoutManager(MarkersList.this,LinearLayoutManager.VERTICAL,false);
         horizontalRecycler = new LinearLayoutManager(MarkersList.this,LinearLayoutManager.HORIZONTAL,false);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        prepareData();
         setCategoryList();
         setMarkersList();
-
+        generateSQLiteData();
+        refreshRecycler();
     }
 
+
     private void prepareData() {
-        placesGral.add(new Place(1, "Estadio Felix Charlaix", "Estadio polideportivo", 13.740402, -89.138712, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "https://i.imgur.com/Z1atGBC.png", "Centro de deportes"));
-        placesGral.add(new Place(2, "Item 2", " polideportivo", 13.714904, -89.155007, "http://cdn-static.denofgeek.com/sites/denofgeek/files/2017/01/red-dead-redemption-2-ps4_0.jpg", "https://i.imgur.com/Z1atGBC.png", "Centro de deportes"));
-        placesGral.add(new Place(2, "Item 2", " Playa", 13.694484, -89.155193, "http://assets.vg247.com/current//2016/06/sniper_elite_4-5-600x338.jpg", "http://i.imgur.com/K6g18lm.png", "Playa"));
-        placesGral.add(new Place(2, "Item 2", " Volcan", 13.655405, -89.171190, "http://nerdist.com/wp-content/uploads/2016/12/The-Last-of-Us-Part-II.jpg", "https://i.imgur.com/yr95Qr7.png", "Volcan"));
-        placesGral.add(new Place(2, "Custom", " Volcan", 13.636806, -89.191550, "http://nerdist.com/wp-content/uploads/2016/12/The-Last-of-Us-Part-II.jpg", "http://i.imgur.com/K6g18lm.png", "Personalizado"));
+        placesGral.clear();
+        for (int i = 0; i < id.length; i++){
+            placesGral.add(new Place(id[i],nombre[i],descripcion[i], latitud[i],longitud[i], imagen[i], thumbnail[i], categoria[i]));
+        }
 
         for (Place tmp : placesGral){
             categories.add(tmp.getCategoria());
         }
         Set<String> unique = new HashSet<>();
+        unique.clear();
         unique.addAll(categories);
         categories.clear();
         categories.add(TODO);
         categories.addAll(unique);
+        unique.clear();
         categoriaBandera = TODO;
+        generateSQLiteData();
         refreshRecycler();
     }
 
     private void refreshRecycler() {
+
         placesMkr.clear();
+        categories.clear();
         recyclerViewMarkers.removeAllViews();
+        recyclerViewCategory.removeAllViews();
+        for (Place tmp : placesGral){
+            categories.add(tmp.getCategoria());
+        }
+        Set<String> unique = new HashSet<>();
+        unique.clear();
+        unique.addAll(categories);
+        categories.clear();
+        categories.add(TODO);
+        categories.addAll(unique);
+        unique.clear();
+
         for (Place tmp2: placesGral){
             if (tmp2.getCategoria().equals(categoriaBandera)){
                 placesMkr.add(tmp2);
@@ -94,6 +161,7 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
             }
         }
         recyclerViewMarkers.invalidate();
+        recyclerViewCategory.invalidate();
     }
 
 
@@ -116,8 +184,26 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     public void onButtonClicked(String categoria) {
         if (!categoriaBandera.equals(categoria)) {
         categoriaBandera = categoria;
-        Toast.makeText(this,"Seleccion" + categoriaBandera,Toast.LENGTH_SHORT).show();
         refreshRecycler();
+        }
+    }
+
+    private void generateSQLiteData(){
+        Cursor c = mapasModel.mostrarTodo();
+        c.moveToFirst();
+
+        while (!c.isAfterLast()){
+            idSQ = c.getInt(c.getColumnIndex("id"));
+            nombreSQ = c.getString(c.getColumnIndex("nombre"));
+            descripcionSQ = c.getString(c.getColumnIndex("descripcion"));
+            latitudSQ = c.getDouble(c.getColumnIndex("latitud"));
+            longitudSQ = c.getDouble(c.getColumnIndex("longitud"));
+            imagenSQ = c.getString(c.getColumnIndex("imagen"));
+            thumbnailSQ = c.getString(c.getColumnIndex("thumbnail"));
+            categoriaSQ = c.getString(c.getColumnIndex("categoria"));
+
+            placesGral.add(new Place(idSQ,nombreSQ,descripcionSQ,latitudSQ,longitudSQ,imagenSQ,thumbnailSQ,categoriaSQ));
+            c.moveToNext();
         }
     }
 }
