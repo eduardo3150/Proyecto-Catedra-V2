@@ -56,7 +56,7 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-            String message = intent.getStringExtra("Status");
+                      String message = intent.getStringExtra("Status");
 
             id = intent.getIntArrayExtra("id");
             nombre = intent.getStringArrayExtra("nombre");
@@ -115,10 +115,14 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
 
 
     private void prepareData() {
+        if (nombre.length!=0){
         placesGral.clear();
         for (int i = 0; i < id.length; i++){
             placesGral.add(new Place(id[i],nombre[i],descripcion[i], latitud[i],longitud[i], imagen[i], thumbnail[i], categoria[i]));
         }
+        }
+
+        generateSQLiteData();
 
         for (Place tmp : placesGral){
             categories.add(tmp.getCategoria());
@@ -131,7 +135,7 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         categories.addAll(unique);
         unique.clear();
         categoriaBandera = TODO;
-        generateSQLiteData();
+
         refreshRecycler();
     }
 

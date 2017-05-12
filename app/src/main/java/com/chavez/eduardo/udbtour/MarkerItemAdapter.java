@@ -44,7 +44,9 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(context,MapsActivity.class);
+                intent.putExtra("Markers",places);
+                context.startActivity(intent);
             }
         });
 
