@@ -2,6 +2,7 @@ package com.chavez.eduardo.udbtour;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ public class CategoryItemAdapter extends RecyclerView.Adapter<CategoryItemAdapte
     Context context;
     ArrayList<String> category = new ArrayList<>();
 
+    private Callback callback;
+
     public CategoryItemAdapter(ArrayList<Place> places, Context context, ArrayList<String> category) {
         this.places = places;
         this.context = context;
@@ -31,8 +34,17 @@ public class CategoryItemAdapter extends RecyclerView.Adapter<CategoryItemAdapte
     }
 
     @Override
-    public void onBindViewHolder(CategoryViewHolder holder, int position) {
+    public void onBindViewHolder(CategoryViewHolder holder, final int position) {
         holder.categoryTitle.setText(category.get(position));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (callback !=null){
+                    callback.onButtonClicked(category.get(position));
+                    Log.d("Exito", "Feedback Capturado");
+                }
+            }
+        });
     }
 
     @Override
@@ -46,6 +58,7 @@ public class CategoryItemAdapter extends RecyclerView.Adapter<CategoryItemAdapte
         public CategoryViewHolder(View itemView) {
             super(itemView);
             categoryTitle = (TextView) itemView.findViewById(R.id.categoryTitle);
+
         }
 
         public TextView getCategoryTitle() {
@@ -55,5 +68,16 @@ public class CategoryItemAdapter extends RecyclerView.Adapter<CategoryItemAdapte
         public void setCategoryTitle(TextView categoryTitle) {
             this.categoryTitle = categoryTitle;
         }
+    }
+
+
+    /**CREANDO LISTENER **/
+    public interface Callback{
+        void onButtonClicked(String categoria);
+    }
+
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
 }

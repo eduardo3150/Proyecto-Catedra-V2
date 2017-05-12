@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 /**
@@ -29,7 +27,7 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
 
     @Override
     public MarkerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main_row,parent,false);
+        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main_row, parent, false);
         return new MarkerViewHolder(row);
     }
 
