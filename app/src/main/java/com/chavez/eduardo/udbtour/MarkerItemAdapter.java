@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,13 +20,15 @@ import java.util.ArrayList;
  * Created by Eduardo_Chavez on 11/5/2017.
  */
 
-public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.MarkerViewHolder> {
+public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.MarkerViewHolder> implements Filterable {
     ArrayList<Place> places = new ArrayList<>();
+    ArrayList<Place> mPlacesFilter = new ArrayList<>();
     Context context;
 
     public MarkerItemAdapter(ArrayList<Place> places, Context context) {
         this.places = places;
         this.context = context;
+        mPlacesFilter = places;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
 
     @Override
     public void onBindViewHolder(MarkerViewHolder holder, int position) {
-        final Place place = places.get(position);
+        final Place place = mPlacesFilter.get(position);
 
         Picasso.with(context).load(place.getImagen()).fit().placeholder(R.drawable.loading).error(R.drawable.alert).into(holder.imageMarker);
         holder.markerName.setText(place.getNombre());
@@ -44,19 +48,21 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context,MapsActivity.class);
-                intent.putExtra("Markers",places);
+
+                Intent intent = new Intent(context, MapsActivity.class);
+                intent.putExtra("Markers", mPlacesFilter);
                 context.startActivity(intent);
+
             }
         });
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (place.getCategoria().equals("Personalizado")){
-                    Toast.makeText(context,"Seleciono " +place.getId(),Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context,EditarCustom.class);
-                    intent.putExtra("ID_",place.getId());
+                if (place.getCategoria().equals("Personalizado")) {
+                    //Toast.makeText(context,"Seleciono " +place.getId(),Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context, EditarCustom.class);
+                    intent.putExtra("ID_", place.getId());
                     context.startActivity(intent);
                 }
                 return true;
@@ -66,7 +72,40 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
 
     @Override
     public int getItemCount() {
-        return places.size();
+        return mPlacesFilter.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                String charString = constraint.toString();
+
+                if (charString.isEmpty()) {
+                    mPlacesFilter = places;
+
+                } else {
+                    ArrayList<Place> filteredList = new ArrayList<>();
+                    for (Place tmp : places) {
+                        if (tmp.getNombre().toLowerCase().contains(charString)) {
+                            filteredList.add(tmp);
+                        }
+                    }
+                    mPlacesFilter = filteredList;
+
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mPlacesFilter;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mPlacesFilter = (ArrayList<Place>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class MarkerViewHolder extends RecyclerView.ViewHolder {

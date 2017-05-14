@@ -59,7 +59,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".EditarCustom"></activity>
+        <activity android:name=".EditarCustom" />
+        <activity android:name=".SplashScreen"></activity>
     </application>
 
 </manifest>
