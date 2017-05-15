@@ -8,16 +8,27 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class EditarCustom extends AppCompatActivity {
+import com.mobsandgeeks.saripaar.ValidationError;
+import com.mobsandgeeks.saripaar.Validator;
+import com.mobsandgeeks.saripaar.annotation.NotEmpty;
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
+public class EditarCustom extends AppCompatActivity implements Validator.ValidationListener {
     private Button updateRoutine;
     private Button deleteRoutine;
     private Button cancelUpdateRoutine;
     private Button confirmUpdateRoutine;
 
+    @NotEmpty(message = "Ingresa un nombre")
     EditText routineNameUpdate;
+
+    @NotEmpty(message = "Ingresa una descripcion")
     EditText routineDescriptionUpdate;
 
     private TextView titleMarker;
@@ -27,9 +38,12 @@ public class EditarCustom extends AppCompatActivity {
     private String nombreSQ,descripcionSQ, imagenSQ, thumbnailSQ, categoriaSQ, nombre, descripcion;
     private double latitudSQ, longitudSQ;
     private int ID, idSQ;
+    private ImageView imageView;
 
     private Place place;
     MapasModel mapasModel;
+
+    Validator validator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +59,7 @@ public class EditarCustom extends AppCompatActivity {
         titleMarker = (TextView) findViewById(R.id.viewMarkerTitle);
         markerNameUpdateTitle = (TextView) findViewById(R.id.routineNameUpdateTitle);
         markerDescriptionUpdateTitle = (TextView) findViewById(R.id.routineDescriptionUpdateTitle);
+        imageView = (ImageView) findViewById(R.id.itemPicture);
 
 
         updateRoutine = (Button) findViewById(R.id.buttonUpdateRoutine);
@@ -53,10 +68,12 @@ public class EditarCustom extends AppCompatActivity {
         cancelUpdateRoutine = (Button)findViewById(R.id.buttonCancelUpdate);
         confirmUpdateRoutine = (Button) findViewById(R.id.buttonConfirmUpdate);
 
-
+        validator = new Validator(this);
+        validator.setValidationListener(this);
 
         loadInitialView();
 
+        Picasso.with(this).load(place.getImagen()).fit().placeholder(R.drawable.loading).error(R.drawable.alert).into(imageView);
         updateRoutine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,7 +100,7 @@ public class EditarCustom extends AppCompatActivity {
         confirmUpdateRoutine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadUpdateData();
+                validator.validate();
             }
         });
 
@@ -146,7 +163,7 @@ public class EditarCustom extends AppCompatActivity {
         routineDescriptionUpdate.setVisibility(View.GONE);
 
         titleMarker.setText(place.getNombre());
-        markerNameUpdateTitle.setText("Nombre de rutina: "+place.getNombre());
+        markerNameUpdateTitle.setText("Nombre: "+place.getNombre());
         markerDescriptionUpdateTitle.setText("Descripcion: "+place.getDescripcion());
 
 
@@ -175,5 +192,24 @@ public class EditarCustom extends AppCompatActivity {
             c.moveToNext();
         }
 
+    }
+
+    @Override
+    public void onValidationSucceeded() {
+        loadUpdateData();
+    }
+
+    @Override
+    public void onValidationFailed(List<ValidationError> errors) {
+        for (ValidationError error:errors){
+            View view = error.getView();
+            String message = error.getCollatedErrorMessage(this);
+
+            if (view instanceof EditText){
+                ((EditText)view).setError(message);
+            } else {
+                Toast.makeText(this,message,Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

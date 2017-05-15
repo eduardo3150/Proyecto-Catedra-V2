@@ -53,7 +53,7 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
             public void onClick(View v) {
                 placeItem.clear();
                 placeItem.add(place);
-                if (place.getCategoria().equals("Personalizado")) {
+                if (place.getCategoria().equals("Sitios que recomiendo")) {
                     new AlertDialog.Builder(context)
                             .setTitle(place.getNombre())
                             .setMessage("¿Que desea hacer?")

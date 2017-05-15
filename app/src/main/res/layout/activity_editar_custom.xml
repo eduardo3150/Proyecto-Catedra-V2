@@ -20,45 +20,73 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp">
-                    <TextView
-                        android:id="@+id/viewMarkerTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="10dp"
-                        android:gravity="center"
-                        android:text=""
-                        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                    <TextView
-                        android:id="@+id/routineNameUpdateTitle"
+            <android.support.v7.widget.CardView
+                android:id="@+id/cardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                card_view:cardCornerRadius="8dp"
+                card_view:cardElevation="8dp"
+                card_view:cardUseCompatPadding="true">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text=""
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                        android:layout_height="170dp"
+                        android:id="@+id/itemPicture"
+                        android:layout_alignParentTop="true"/>
 
-                    <EditText
-                        android:id="@+id/routineNameUpdate"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint=""
-                        android:maxLength="50" />
+                        android:baselineAligned="false"
+                        android:orientation="vertical"
+                        android:padding="10dp"
+                        android:layout_below="@id/itemPicture"
+                        android:animateLayoutChanges="true">
+                        <TextView
+                            android:id="@+id/viewMarkerTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center"
+                            android:text=""
+                            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                    <TextView
-                        android:id="@+id/routineDescriptionUpdateTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text=""
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                        <TextView
+                            android:id="@+id/routineNameUpdateTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text=""
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                    <EditText
-                        android:id="@+id/routineDescriptionUpdate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint=""
-                        android:maxLength="50" />
+                        <EditText
+                            android:id="@+id/routineNameUpdate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint=""
+                            android:maxLength="50" />
+
+                        <TextView
+                            android:id="@+id/routineDescriptionUpdateTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text=""
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                        <EditText
+                            android:id="@+id/routineDescriptionUpdate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint=""
+                            android:maxLength="50" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
 
 
             <LinearLayout

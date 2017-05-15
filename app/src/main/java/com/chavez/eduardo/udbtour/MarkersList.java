@@ -245,6 +245,7 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem search = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(search);
+        searchView.setQueryHint("Ir a Sitio");
         search(searchView);
         return true;
     }

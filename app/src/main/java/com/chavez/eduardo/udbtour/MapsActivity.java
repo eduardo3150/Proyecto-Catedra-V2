@@ -1,11 +1,13 @@
 package com.chavez.eduardo.udbtour;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -42,13 +44,16 @@ import com.koushikdutta.ion.Ion;
 import java.util.ArrayList;
 
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
 
+    EditText userInput;
+    EditText userInput2;
 
-    SupportMapFragment mapFrag;
     GoogleApiClient mGoogleApiClient;
     Location lastLocation;
     Marker mCurrentLocationMarker;
@@ -57,15 +62,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<Place> places = new ArrayList<>();
     SeekBar seekBarZoom;
-    LatLng defaultLatLng;
-    Button currentPos;
+    LatLng defaultLatLng, currentLatLng;
+
+    Button currentPos, changeMap;
     Bitmap custom;
     String placeHolderCust, imgCust;
-    String CATEGORIA = "Personalizado";
+    String CATEGORIA = "Sitios que recomiendo";
     int zoomSaved = 10;
+    int zoomSelect = 10;
 
-
+    int touch=0;
     MapasModel mapasModel;
+    Double newLat,newLon;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -86,10 +94,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         seekBarZoom = (SeekBar) findViewById(R.id.seekZoom);
         currentPos = (Button) findViewById(R.id.ubicacionActual);
+        changeMap = (Button) findViewById(R.id.cambiarMapa);
         seekBarZoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                chooseMoveCamera(mMap, defaultLatLng, progress);
+                if (zoomSelect == 10) {
+                    chooseMoveCamera(mMap, defaultLatLng, progress);
+                }
+
+                if (zoomSelect == 20) {
+                    chooseMoveCamera(mMap, currentLatLng, progress);
+                }
                 zoomSaved = progress;
 
             }
@@ -108,18 +123,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         currentPos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                chooseMoveCamera(mMap, currentLatLng, zoomSaved);
+                zoomSelect = 20;
             }
         });
 
         currentPos.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                newCustomMarker(currentLatLng.latitude, currentLatLng.longitude);
+                zoomSelect = 20;
                 return true;
             }
         });
+        changeMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (touch){
+                    case 0:
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        touch = 1;
+                        break;
+                    case 1:
+                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        touch = 2;
+                        break;
+                    case 2:
+                        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                        touch = 3;
+                        break;
+                    case 3:
+                        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        touch = 0;
+                        break;
+                    default:
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        touch = 0;
 
+                        break;
 
+                }
+            }
+        });
+        currentPos.setEnabled(false);
     }
 
     @Override
@@ -149,7 +195,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         custom = getBitmapFromURL(imgCust);
-
         //Initialize Google Play Services
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
@@ -169,7 +214,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(defaultLatLng));
         chooseMoveCamera(mMap, defaultLatLng, zoomSaved);
-
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -194,7 +238,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
+                defaultLatLng = marker.getPosition();
+                zoomSelect = 10;
+                return true;
+            }
+        });
+
         loadMarkers();
+
 
     }
 
@@ -236,12 +292,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void newCustomMarker(final Double latitudObt, final Double longitdObt) {
+        newLat = latitudObt;
+        newLon = longitdObt;
         LayoutInflater li = LayoutInflater.from(this);
         View dialogView = li.inflate(R.layout.dialog, null);
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setView(dialogView);
-        final EditText userInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputName);
-        final EditText userInput2 = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputDescription);
+        userInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputName);
+        userInput2 = (EditText) dialogView.findViewById(R.id.editTextDialogUserInputDescription);
         mMap.clear();
         alertDialog.setTitle("Marcador nuevo")
                 .setCancelable(false)
@@ -249,12 +307,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setPositiveButton("Agregar marcador", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String nombre = userInput.getText().toString();
-                        String descripcion = userInput2.getText().toString();
-                        mapasModel.insertar(nombre, descripcion, latitudObt, longitdObt, placeHolderCust, imgCust, CATEGORIA);
-                        places.add(new Place(1, nombre, descripcion, latitudObt, longitdObt, placeHolderCust, imgCust, CATEGORIA));
-                        Toast.makeText(getApplicationContext(), "Marcador agregado", Toast.LENGTH_LONG).show();
-                        loadMarkers();
+
                     }
                 })
                 .setNegativeButton("No agregar", new DialogInterface.OnClickListener() {
@@ -262,8 +315,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onClick(DialogInterface dialogInterface, int i) {
                         loadMarkers();
                     }
-                })
-                .show();
+                });
+        AlertDialog alertDialogN = alertDialog.create();
+        alertDialogN.show();
+
+        Button validator = alertDialogN.getButton(DialogInterface.BUTTON_POSITIVE);
+        validator.setOnClickListener(new CustomListener(alertDialogN));
+
     }
 
 
@@ -273,7 +331,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mCurrentLocationMarker != null) {
             mCurrentLocationMarker.remove();
         }
-
+        if (location != null){
+            currentPos.setEnabled(true);
+            currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        }
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
@@ -390,4 +451,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // permissions this app might request
         }
     }
+
+    class CustomListener implements View.OnClickListener{
+        private final Dialog dialog;
+        public CustomListener(Dialog dialog){
+            this.dialog = dialog;
+        }
+
+        @Override
+        public void onClick(View view) {
+            validateNameField(userInput);
+        }
+
+        private boolean validateNameField(EditText editText){
+            String regexString = "^[A-Za-z\\S]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$";
+            Pattern r = Pattern.compile(regexString);
+
+            Matcher m =r.matcher(editText.getText());
+            if (m.matches()){
+                String nombre = userInput.getText().toString();
+                String descripcion = userInput2.getText().toString();
+                mapasModel.insertar(nombre, descripcion, newLat, newLon, placeHolderCust, imgCust, CATEGORIA);
+                places.add(new Place(1, nombre, descripcion, newLat, newLon, placeHolderCust, imgCust, CATEGORIA));
+                Toast.makeText(getApplicationContext(), "Marcador agregado", Toast.LENGTH_LONG).show();
+                loadMarkers();
+                dialog.dismiss();
+            } else {
+                errorField(editText);
+                editText.setError("Ingrese caracteres validos");
+                return false;
+            }
+
+            return true;
+        }
+
+        void errorField(EditText editText){
+            editText.setBackgroundColor(Color.rgb(255,235,238));
+        }
+
+
+    }
+
 }
+
+
