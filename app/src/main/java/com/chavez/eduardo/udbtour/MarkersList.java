@@ -92,7 +92,6 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
                 mMessageReceiver, new IntentFilter("WebService"));
 
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,11 +242,11 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main,menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem search = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(search);
         search(searchView);
-        return  true;
+        return true;
     }
 
     @Override
@@ -264,10 +263,14 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    recyclerViewCategory.setVisibility(View.VISIBLE);
+                } else {
+                    recyclerViewCategory.setVisibility(View.GONE);
+                }
                 markerItemAdapter.getFilter().filter(newText);
                 return true;
             }
-
 
         });
     }

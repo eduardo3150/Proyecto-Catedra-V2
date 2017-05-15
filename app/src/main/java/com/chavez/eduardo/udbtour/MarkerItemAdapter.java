@@ -1,7 +1,9 @@
 package com.chavez.eduardo.udbtour;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.MarkerViewHolder> implements Filterable {
     ArrayList<Place> places = new ArrayList<>();
     ArrayList<Place> mPlacesFilter = new ArrayList<>();
+    ArrayList<Place> placeItem = new ArrayList<>();
     Context context;
 
     public MarkerItemAdapter(ArrayList<Place> places, Context context) {
@@ -48,23 +51,44 @@ public class MarkerItemAdapter extends RecyclerView.Adapter<MarkerItemAdapter.Ma
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Intent intent = new Intent(context, MapsActivity.class);
-                intent.putExtra("Markers", mPlacesFilter);
-                context.startActivity(intent);
-
+                placeItem.clear();
+                placeItem.add(place);
+                if (place.getCategoria().equals("Personalizado")) {
+                    new AlertDialog.Builder(context)
+                            .setTitle(place.getNombre())
+                            .setMessage("¿Que desea hacer?")
+                            .setPositiveButton("Editar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(context, EditarCustom.class);
+                                    intent.putExtra("ID_", place.getId());
+                                    context.startActivity(intent);
+                                }
+                            })
+                            .setNegativeButton("Ver", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(context, MapsActivity.class);
+                                    intent.putExtra("Markers", placeItem);
+                                    context.startActivity(intent);
+                                }
+                            })
+                            .show();
+                } else {
+                    Intent intent = new Intent(context, MapsActivity.class);
+                    intent.putExtra("Markers", placeItem);
+                    context.startActivity(intent);
+                }
             }
         });
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (place.getCategoria().equals("Personalizado")) {
-                    //Toast.makeText(context,"Seleciono " +place.getId(),Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context, EditarCustom.class);
-                    intent.putExtra("ID_", place.getId());
-                    context.startActivity(intent);
-                }
+                Intent intent = new Intent(context, MapsActivity.class);
+                intent.putExtra("Markers", mPlacesFilter);
+                context.startActivity(intent);
+
                 return true;
             }
         });

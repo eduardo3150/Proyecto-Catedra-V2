@@ -30,7 +30,7 @@ public class WebService extends Service {
     //POR SU URL OBTENIDA
     //DE SU CONSULTA
     //http://192.168.43.3:5010/test/40ec4f09106a1b9a
-    static final String APIURL="https://gitlab.com/snippets/1661859/raw";
+    static final String APIURL="https://gist.githubusercontent.com/diaz2298R/436c533a3b81331e3035706d5aca4757/raw/ff5ca15a79a54c9772fa008d33944ded9412bde6/mapas.json";
     //Cola de consultas de Volley
     RequestQueue requestQueue;
     //Consulta de Volley
