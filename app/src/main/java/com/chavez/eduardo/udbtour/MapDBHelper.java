@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class MapDBHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 4;
 
     public static final String DATABASE_NAME = "map.db";
 
@@ -19,6 +19,18 @@ public class MapDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+
+        sqLiteDatabase.execSQL("CREATE TABLE cacheMapa (" +
+                " id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                " nombre TEXT," +
+                " descripcion TEXT," +
+                " latitud REAL," +
+                " longitud REAL," +
+                " imagen TEXT," +
+                " thumbnail TEXT," +
+                " categoria TEXT" +
+                ");");
+
         sqLiteDatabase.execSQL("CREATE TABLE mapas (" +
                 " id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                 " nombre TEXT," +
@@ -34,8 +46,9 @@ public class MapDBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS mapas");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS cacheMapa");
         onCreate(sqLiteDatabase);
     }
-    //On
+
 }
 

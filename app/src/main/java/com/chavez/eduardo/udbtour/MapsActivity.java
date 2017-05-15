@@ -39,13 +39,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<Place> places = new ArrayList<>();
     SeekBar seekBarZoom;
-    LatLng defaultLatLng = new LatLng(13.714966, -89.155755);
+    LatLng defaultLatLng;
     Button currentPos;
     Bitmap custom;
     Double latitudCust, longitudCust;
     String placeHolderCust, imgCust;
     FollowPosition followPosition;
     String CATEGORIA = "Personalizado";
+    int zoomSaved;
 
     MapasModel mapasModel;
 
@@ -60,7 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         places = (ArrayList<Place>) getIntent().getSerializableExtra("Markers");
-
+        defaultLatLng = new LatLng(places.get(0).getLatitud(),places.get(0).getLongitud());
         seekBarZoom = (SeekBar) findViewById(R.id.seekZoom);
         currentPos = (Button) findViewById(R.id.ubicacionActual);
         seekBarZoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -68,8 +69,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (followPosition.getLatLng() != null) {
                     chooseMoveCamera(mMap, followPosition.getLatLng(), progress);
+                    zoomSaved = progress;
                 } else {
                     chooseMoveCamera(mMap, defaultLatLng, progress);
+                    zoomSaved = progress;
                 }
 
             }
@@ -89,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if (followPosition.getLatLng() != null) {
-                    chooseMoveCamera(mMap, followPosition.getLatLng(), 10);
+                    chooseMoveCamera(mMap, followPosition.getLatLng(), zoomSaved);
                 }
             }
         });
@@ -110,7 +113,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         protected void onPause () {
-
             if (followPosition != null) {
                 followPosition.unRegister(MapsActivity.this);
             }
@@ -142,7 +144,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 public void onMapClick(LatLng latLng) {
                     // Creating a marker
                     MarkerOptions markerOptions = new MarkerOptions();
-
                     // Setting the position for the marker
                     markerOptions.position(latLng);
 

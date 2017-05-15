@@ -30,7 +30,7 @@ public class WebService extends Service {
     //POR SU URL OBTENIDA
     //DE SU CONSULTA
     //http://192.168.43.3:5010/test/40ec4f09106a1b9a
-    static final String APIURL="https://gitlab.com/snippets/1661859/raw";
+    static final String APIURL="https://gist.githubusercontent.com/diaz2298R/436c533a3b81331e3035706d5aca4757/raw/ff5ca15a79a54c9772fa008d33944ded9412bde6/mapas.json";
     //Cola de consultas de Volley
     RequestQueue requestQueue;
     //Consulta de Volley
@@ -41,8 +41,12 @@ public class WebService extends Service {
     NotificationCompat.Builder builder;
 
     int oldTamanio = 0;
+    private int segundos = 30;
+    CacheMapasModel db;
+    Context contextDB;
 
     public WebService() {
+
     }
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,9 +55,11 @@ public class WebService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        contextDB = getApplicationContext();
+        this.db = new CacheMapasModel(contextDB);
         //TODO: Hay que retirar los logs
         Log.d(DEBUG,"El servicio se ha iniciado...");
-
+        oldTamanio = db.mostrarTamanio();
         notificationManager = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
         requestQueue= Volley.newRequestQueue(this);
@@ -61,11 +67,11 @@ public class WebService extends Service {
         //Notificacion
         builder = new NotificationCompat.Builder(this)
                 .setContentTitle("Preparando")
-                .setAutoCancel(false)
                 .setSmallIcon(R.drawable.ic_stat_map)
                 .setContentText("Acomodando maletas...")
-                .setOngoing(false)
         ;
+
+
 
         //Inicio del servicio
         Intent resultIntent = new Intent(this, MarkersList.class);
@@ -116,7 +122,11 @@ public class WebService extends Service {
                         requestQueue.add(request);
                         //El tiempo está dado en milisengundos
                         //por ello multiplicamos por 1000
-                        Thread.sleep(30000);
+
+
+                        Thread.sleep(segundos *  1000);
+
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -135,56 +145,45 @@ public class WebService extends Service {
 
         JSONArray data = response.getJSONArray("result");
         int tamanio = data.length();
-        int[] id2 = new int[tamanio];
-        String[] nombre = new String[tamanio];
-        String[] descripcion = new String[tamanio];
-        double[] latitud = new double[tamanio ];
-        double[] longitud = new double[tamanio];
-        String[] imagen = new String[tamanio];
-        String[] thumbnail = new String[tamanio];
-        String[] categoria = new String[tamanio];
 
-        for ( int i = 0; i < tamanio; i ++ ){
-            JSONObject datos= data.getJSONObject(i);
-            id2[i] = datos.getInt("id");
-            nombre[i] = datos.getString("nombre");
-            descripcion[i] = datos.getString("descripcion");
-            latitud[i] = datos.getDouble("latitud");
-            longitud[i] = datos.getDouble("longitud");
-            imagen[i] = datos.getString("imagen");
-            thumbnail[i] = datos.getString("thumbnail");
-            categoria[i] = datos.getString("categoria");
 
-        }
-
-        sendMessageToActivity(id2, nombre, descripcion, latitud, longitud,
-                imagen,thumbnail, categoria);
+        sendMessageToActivity(true);
+        Log.d("tamanio", String.valueOf(tamanio));
         if(tamanio > oldTamanio){
-            builder.setContentTitle("Nuevos")
-                    .setContentText("Agregamos mas sitios!");
+            db.eliminarTodo();
+            for ( int i = 0; i < tamanio; i ++ ){
+                JSONObject datos= data.getJSONObject(i);
+                String nombre = datos.getString("nombre");
+                String descripcion = datos.getString("descripcion");
+                Double latitud = datos.getDouble("latitud");
+                Double longitud = datos.getDouble("longitud");
+                String imagen = datos.getString("imagen");
+                String thumbnail = datos.getString("thumbnail");
+                String categoria = datos.getString("categoria");
+                db.insertar(nombre, descripcion, latitud, longitud, imagen, thumbnail, categoria);
+                sendMessageToActivity(true);
 
-            notificationManager.notify(id,builder.build());
-            Log.d("valor", String.valueOf(oldTamanio));
-            oldTamanio = tamanio;
+
+                builder.setContentTitle("Nuevos")
+                        .setContentText("Agregamos mas sitios!");
+
+                notificationManager.notify(5556,builder.build());
+                notificationManager.cancel(id);
+                Log.d("valor", String.valueOf(oldTamanio));
+                oldTamanio = tamanio;
+            }
+
+        }else{
+            notificationManager.cancel(id);
         }
-
 
 
     }
 
-    private void sendMessageToActivity(int[] id,String[] nombre,String[] descripcion,
-                                       double[] latitud, double[] longitud,String[] imagen,
-                                       String[] thumbnail,String[] categoria) {
+    private void sendMessageToActivity(Boolean iniciar) {
         Intent intent = new Intent("WebService");
         // You can also include some extra data.
-        intent.putExtra("id", id);
-        intent.putExtra("nombre", nombre);
-        intent.putExtra("descripcion", descripcion);
-        intent.putExtra("latitud", latitud);
-        intent.putExtra("longitud", longitud);
-        intent.putExtra("imagen", imagen);
-        intent.putExtra("thumbnail", thumbnail);
-        intent.putExtra("categoria", categoria);
+        intent.putExtra("Status", iniciar);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
