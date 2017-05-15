@@ -43,14 +43,14 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     String CUSTOM = "Custom";
 
 
-    int[] id;
-    String[] nombre;
-    String[] descripcion;
-    double[] latitud;
-    double[] longitud;
-    String[] imagen;
-    String[] thumbnail;
-    String[] categoria;
+    int id;
+    String nombre;
+    String descripcion;
+    double latitud;
+    double longitud;
+    String imagen;
+    String thumbnail;
+    String categoria;
 
 
     int idSQ;
@@ -58,6 +58,8 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
     double latitudSQ, longitudSQ;
 
     MapasModel mapasModel;
+    CacheMapasModel cacheMapasModel;
+
     public boolean checker = true;
     public int firstSQLite = 10;
 
@@ -65,20 +67,11 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-            String message = intent.getStringExtra("Status");
+            Boolean iniciarSincronia = intent.getBooleanExtra("Status", false);
 
-            id = intent.getIntArrayExtra("id");
-            nombre = intent.getStringArrayExtra("nombre");
-            descripcion = intent.getStringArrayExtra("descripcion");
-            latitud = intent.getDoubleArrayExtra("latitud");
-            longitud = intent.getDoubleArrayExtra("longitud");
-            imagen = intent.getStringArrayExtra("imagen");
-            thumbnail = intent.getStringArrayExtra("thumbnail");
-            categoria = intent.getStringArrayExtra("categoria");
             initialData();
 
-            checker = false;
-            if (!checker) {
+            if (iniciarSincronia) {
                 prepareData();
             }
 
@@ -92,13 +85,14 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         setContentView(R.layout.activity_markers_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        mapasModel = new MapasModel(this);
+        cacheMapasModel = new CacheMapasModel(this);
         startService(new Intent(MarkersList.this, WebService.class));
         LocalBroadcastManager.getInstance(MarkersList.this).registerReceiver(
                 mMessageReceiver, new IntentFilter("WebService"));
 
 
-        mapasModel = new MapasModel(this);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,26 +103,42 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
             }
         });
 
-        recyclerViewMarkers = (RecyclerView) findViewById(R.id.recyclerViewMarkers);
-        recyclerViewCategory = (RecyclerView) findViewById(R.id.recyclerViewCategories);
-        verticalRecycler = new LinearLayoutManager(MarkersList.this, LinearLayoutManager.VERTICAL, false);
-        horizontalRecycler = new LinearLayoutManager(MarkersList.this, LinearLayoutManager.HORIZONTAL, false);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        recyclerViewMarkers = (RecyclerView) findViewById(R.id.recyclerViewMarkers);
+        recyclerViewCategory = (RecyclerView) findViewById(R.id.recyclerViewCategories);
+        verticalRecycler = new LinearLayoutManager(MarkersList.this, LinearLayoutManager.VERTICAL, false);
+        horizontalRecycler = new LinearLayoutManager(MarkersList.this, LinearLayoutManager.HORIZONTAL, false);
         setCategoryList();
         setMarkersList();
+        initialData();
         prepareData();
         refreshRecycler();
+
     }
 
 
     private void initialData() {
         placesReceived.clear();
-        for (int i = 0; i < id.length; i++) {
-            placesReceived.add(new Place(id[i], nombre[i], descripcion[i], latitud[i], longitud[i], imagen[i], thumbnail[i], categoria[i]));
+        Cursor c = cacheMapasModel.mostrarTodo();
+        placesSqlite.clear();
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            id = c.getInt(c.getColumnIndex("id"));
+            nombre = c.getString(c.getColumnIndex("nombre"));
+            descripcion = c.getString(c.getColumnIndex("descripcion"));
+            latitud = c.getDouble(c.getColumnIndex("latitud"));
+            longitud = c.getDouble(c.getColumnIndex("longitud"));
+            imagen = c.getString(c.getColumnIndex("imagen"));
+            thumbnail = c.getString(c.getColumnIndex("thumbnail"));
+            categoria = c.getString(c.getColumnIndex("categoria"));
+
+            placesReceived.add(new Place(id, nombre, descripcion, latitud, longitud, imagen, thumbnail, categoria));
+            c.moveToNext();
         }
     }
 
@@ -152,7 +162,6 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
         categoriaBandera = TODO;
 
         refreshRecycler();
-        checker = true;
     }
 
     private void refreshRecycler() {
@@ -262,4 +271,5 @@ public class MarkersList extends AppCompatActivity implements CategoryItemAdapte
 
         });
     }
+
 }
