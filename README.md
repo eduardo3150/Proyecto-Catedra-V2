@@ -24,6 +24,15 @@ Un servidor web, puede ser local (localhost)
 * [Eduardo Chávez](https://github.com/eduardo3150)
 * [César Callejas](https://github.com/LyckanSv)
 
+## Imagenes
+
+![alt text](http://i.imgur.com/3gNNlLN.png "Logo Title Text 1")
+
+![alt text](http://i.imgur.com/w0R5kDu.png "Logo Title Text 1")
+
+![alt text](http://i.imgur.com/dnVo4D1.png "Logo Title Text 1")
+
+![alt text](http://i.imgur.com/YOqwsCv.png "Logo Title Text 1")
 
 ## Licencia
 
