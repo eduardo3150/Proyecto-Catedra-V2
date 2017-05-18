@@ -1,5 +1,7 @@
 # Proyecto de Catedra V2
-Aplicación creada para la materia de Desarrollo de software para móviles de la Universidad Don Bosco (2017)
+Esta aplicación permite al usuario obtener cierta información (Nombre, Descripción, Imagen, Ubicación) sobre diferentes sitios de El Salvador por medio de un servicio web.
+La información se mostrará en listados y podrán ser filtrados por categorias, además se ha utilizado la API de GoogleMaps para permitir ver la ubicación exacta de estos lugares en un mapa, este mapa mostrará también al usuario su ubicación actual.
+La aplicación automaticamente descargará las nuevas actualizaciones que el servicio web contenga y también le permitirá al usuario almacenar sus propios marcadores personalizados.
 
 ### Requerimientos
 Para poder visualizar este proyecto será necesario:
