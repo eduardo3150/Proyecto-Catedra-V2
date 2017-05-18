@@ -15,9 +15,10 @@ Un servidor web, puede ser local (localhost)
 * [Android Studio](https://developer.android.com/studio/index.html) 
 * [Deployd](http://deployd.com/)  (Backend)
 
-##Contribuidores
-[Eduardo Chavez](https://github.com/eduardo3150)
-[César Callejas](https://github.com/LyckanSv)
+## Contribuidores
+
+* [Eduardo Chavez](https://github.com/eduardo3150)
+* [César Callejas](https://github.com/LyckanSv)
 
 
 ## Licencia
