@@ -21,7 +21,7 @@ Un servidor web, puede ser local (localhost)
 
 ## Contribuidores
 
-* [Eduardo Chavez](https://github.com/eduardo3150)
+* [Eduardo Chávez](https://github.com/eduardo3150)
 * [César Callejas](https://github.com/LyckanSv)
 
 
